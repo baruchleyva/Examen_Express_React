@@ -5,10 +5,12 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('./dbconexion');
+const userRoutes = require('./routes/users');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/users', userRoutes);
 
 //Palabra Secreta
 const JWT = process.env.JWT;
@@ -25,7 +27,7 @@ app.post('/registrar', async (req, res) => {
     }
 });
 
-//Ruta para iniciar sesion, login.
+//Ruta para iniciar sesion, login. regresa el JWT
 app.post('/login', async (req, res) => {
     const {first_name, last_name, email, password, phone_number, role, status, address, profile_picture } = req.body;
     const resultado = await pool.query('SELECT * FROM public.usuarios WHERE email = $1', [email]);
@@ -38,10 +40,9 @@ app.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: usuario.id, email: usuario.email}, JWT, {expiresIn: '1h'});
     res.json({token});
-        
 });
 
-// rutas protegidas
+// rutas protegidas para que se accedan solo si esta iniciada la sesion
 function autenticacionToken(req, res, next){
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -54,6 +55,7 @@ function autenticacionToken(req, res, next){
     })
 };
 
+//ruta que trae informacion si existe la autenticacion por JWT
 app.get('/perfil', autenticacionToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT id, first_name, last_name, email, phone_number, role, status, address, profile_picture FROM public.usuarios WHERE id = $1', [req.user.id]);
@@ -64,6 +66,7 @@ app.get('/perfil', autenticacionToken, async (req, res) => {
     }
 });
 
+//Ejemplos - pruebas de rutas
 app.get('/',(req,res)=>{
     res.send('Hola :) ...');
 });
