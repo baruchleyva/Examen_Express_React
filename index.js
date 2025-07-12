@@ -41,6 +41,29 @@ app.post('/login', async (req, res) => {
         
 });
 
+// rutas protegidas
+function autenticacionToken(req, res, next){
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if(!token) return res.sendStatus(401);
+
+    jwt.verify(token, JWT, (err, user) =>{
+        if(err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    })
+};
+
+app.get('/perfil', autenticacionToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, first_name, last_name, email, phone_number, role, status, address, profile_picture FROM public.usuarios WHERE id = $1', [req.user.id]);
+        const usuario = result.rows[0];
+        res.json({ message: 'Acceso correcto', usuario });
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener información del perfil' });
+    }
+});
+
 app.get('/',(req,res)=>{
     res.send('Hola :) ...');
 });
