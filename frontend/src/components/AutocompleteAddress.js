@@ -42,7 +42,7 @@ export default function AutocompleteAddress({ onPlaceSelected }) {
   };
 // utilizacion del Api de Google: Places API  que permite cargar la informacion en base a una busqueda
   return (
-    <LoadScript googleMapsApiKey="AIzaSyBBOZRgnZCbvOF_Lnph_PxVe5-zG0tLmWw" libraries={libraries}>
+    <LoadScript googleMapsApiKey="[LLAVE DE LA API]" libraries={libraries}>
       <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
         <input
             type="text"
