@@ -27,7 +27,7 @@ router.get('/',[
     //Por rol
     if(role){
         params.push(role);
-        consultaBase += `AND role = $${params.length}`;
+        consultaBase += ` AND role = $${params.length}`;
     }
     //Por estatus
     if (status) {
@@ -49,6 +49,24 @@ router.get('/',[
     } catch (err) {
       res.status(500).json({ error: 'Error al obtener usuarios', detalle: err });
     }
+});
+
+//Usuario por id
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM public.usuarios WHERE id = $1', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener usuario', detalle: err });
+  }
 });
 
 //Creacion de usuario
